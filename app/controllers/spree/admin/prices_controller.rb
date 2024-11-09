@@ -10,14 +10,14 @@ module Spree
           supported_currencies.each do |currency|
             price = variant.price_in(currency.iso_code)
             
-            if prices[currency.iso_code].blank?
-              price.money = nil
+            price_value = prices[currency.iso_code]
+            if price_value.blank? || price_value.to_f.zero?
+              price.amount = nil
             else
-              amount = BigDecimal(prices[currency.iso_code])
-              price.money = Spree::Money.from_amount(amount, currency: currency.iso_code)
+              price.amount = BigDecimal(price_value)
             end
             
-            price.save! if price.new_record? && price.money || !price.new_record? && price.changed?
+            price.save! if price.new_record? || price.changed?
           end
         end
         flash[:success] = Spree.t('notice.prices_saved')
