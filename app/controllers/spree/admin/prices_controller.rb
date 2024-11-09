@@ -9,9 +9,15 @@ module Spree
           next unless variant
           supported_currencies.each do |currency|
             price = variant.price_in(currency.iso_code)
-            price.price = prices[currency.iso_code].presence
-            if price.price.present?
-              price.save! if price.new_record? || price.changed?
+            price_value = prices[currency.iso_code]
+            if price_value.blank? || price_value.to_f == 0
+              price.price = nil
+            else
+              price.price = BigDecimal(price_value)
+            end
+
+            if price.price.present? || price.changed?
+              price.save!
             end
           end
         end
