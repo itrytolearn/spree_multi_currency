@@ -13,11 +13,11 @@ module Spree
             if prices[currency.iso_code].blank?
               price.money = nil
             else
-              cents = (BigDecimal(prices[currency.iso_code]) * 100).to_i
-              price.money = Spree::Money.new(cents, currency: currency.iso_code)
+              amount = BigDecimal(prices[currency.iso_code])
+              price.money = Spree::Money.from_amount(amount, currency: currency.iso_code)
             end
-
-            price.save! if price.changed?
+            
+            price.save! if price.new_record? && price.money || !price.new_record? && price.changed?
           end
         end
         flash[:success] = Spree.t('notice.prices_saved')
