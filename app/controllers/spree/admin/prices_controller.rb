@@ -9,16 +9,15 @@ module Spree
           next unless variant
           supported_currencies.each do |currency|
             price = variant.price_in(currency.iso_code)
-            price_value = prices[currency.iso_code]
-            if price_value.blank? || price_value.to_f == 0
-              price.price = nil
+            
+            if prices[currency.iso_code].blank?
+              price.money = nil
             else
-              price.price = BigDecimal(price_value)
+              cents = (BigDecimal(prices[currency.iso_code]) * 100).to_i
+              price.money = Spree::Money.new(cents, currency: currency.iso_code)
             end
 
-            if price.price.present? || price.changed?
-              price.save!
-            end
+            price.save! if price.changed?
           end
         end
         flash[:success] = Spree.t('notice.prices_saved')
